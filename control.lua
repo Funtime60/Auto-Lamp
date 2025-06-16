@@ -73,7 +73,7 @@ local function on_tick(event)
 						end
 					end
 				end
-				game.players[1].print("Tick: "..event.tick.." | Unit Number - "..entity.unit_number.." -> "..serpent.block(supply_area))
+				-- game.players[1].print("Tick: "..event.tick.." | Unit Number - "..entity.unit_number.." -> "..serpent.block(supply_area))
 			end
 			poleQueue["UN"..entity.unit_number] = nil
 		end
