@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this mod
 title: "[REQUEST]"
-labels: ''
+labels: request
 assignees: Funtime60
 
 ---
