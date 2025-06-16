@@ -3,6 +3,8 @@ name: Publish Factorio Mod
 on:
     release:
         types: [published]
+    
+    workflow_dispatch:
 
 jobs:
     publish-mod:
