@@ -32,6 +32,20 @@ local function on_area_selected(event)
 	end
 end
 
+local function on_reverse_selected(event)
+	if event.item ~= "auto-lamp-tool" then
+		return
+	end
+
+	local player = game.players[event.player_index]
+	local surface = player.surface
+
+	local lamps = surface.find_entities_filtered({area = event.area, type = "lamp", force = player.force})
+	for _, entity in pairs(lamps) do
+		player.print(serpent.block(entity))
+	end
+end
+
 local function on_tick(event)
 	local _, spot   = next(spotQueue)
 	if spot then
@@ -84,4 +98,6 @@ script.on_event(defines.events.on_lua_shortcut, on_shortcut)
 script.on_event(defines.events.on_tick, on_tick)
 script.on_event(defines.events.on_player_selected_area, on_area_selected)
 script.on_event(defines.events.on_player_alt_selected_area, on_area_selected)
+script.on_event(defines.events.on_player_reverse_selected_area, on_reverse_selected)
+script.on_event(defines.events.on_player_alt_reverse_selected_area, on_reverse_selected)
 script.on_event(defines.events.on_player_dropped_item, on_drop)
