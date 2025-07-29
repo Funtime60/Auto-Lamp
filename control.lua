@@ -40,9 +40,12 @@ local function on_reverse_selected(event)
 	local player = game.players[event.player_index]
 	local surface = player.surface
 
-	local lamps = surface.find_entities_filtered({area = event.area, type = "lamp", force = player.force})
-	for _, entity in pairs(lamps) do
-		player.print(serpent.block(entity))
+	local newUndoIndex = 0
+	for _, entity in pairs(event.entities) do
+		if entity.type == "lamp" and not entity.is_connected_to_electric_network() then
+			entity.order_deconstruction(player.force, player, newUndoIndex)
+			newUndoIndex = 1
+		end
 	end
 end
 
