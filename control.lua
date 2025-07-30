@@ -1,19 +1,19 @@
 PoleQueue = {}
 SpotQueue = {}
 
-local function on_shortcut(event)
-	if event.prototype_name == "auto-lamp-shortcut" then
-		local player = game.players[event.player_index]
-		player.cursor_stack.set_stack({name = "auto-lamp-tool"})
-		player.cursor_stack_temporary = true
-	end
-end
+-- local function on_shortcut(event)
+-- 	if event.prototype_name == "auto-lamp-shortcut" then
+-- 		local player = game.players[event.player_index]
+-- 		player.cursor_stack.set_stack({name = "auto-lamp-tool"})
+-- 		player.cursor_stack_temporary = true
+-- 	end
+-- end
 
-local function on_drop(event)
-	if event.entity and event.entity.stack and event.entity.stack.name == "auto-lamp-tool" then
-		event.entity.stack.clear()
-	end
-end
+-- local function on_drop(event)
+-- 	if event.entity and event.entity.stack and event.entity.stack.name == "auto-lamp-tool" then
+-- 		event.entity.stack.clear()
+-- 	end
+-- end
 
 local function on_area_selected(event)
 	if event.item ~= "auto-lamp-tool" then
@@ -97,10 +97,11 @@ local function on_tick(event)
 	end
 end
 
-script.on_event(defines.events.on_lua_shortcut, on_shortcut)
+-- script.on_event(defines.events.on_lua_shortcut, on_shortcut)
+-- script.on_event(defines.events.on_lu)
 script.on_event(defines.events.on_tick, on_tick)
 script.on_event(defines.events.on_player_selected_area, on_area_selected)
 script.on_event(defines.events.on_player_alt_selected_area, on_area_selected)
 script.on_event(defines.events.on_player_reverse_selected_area, on_reverse_selected)
 script.on_event(defines.events.on_player_alt_reverse_selected_area, on_reverse_selected)
-script.on_event(defines.events.on_player_dropped_item, on_drop)
+-- script.on_event(defines.events.on_player_dropped_item, on_drop)
