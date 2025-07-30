@@ -2,7 +2,7 @@ name: Publish Factorio Mod
 
 on:
     release:
-        types: [published]
+        types: [released]
     
     workflow_dispatch:
 
@@ -12,6 +12,10 @@ jobs:
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
+            
+            - name: Commit processed file
+              run: | 
+                  echo "The release tag is: ${{ github.event.release.tag_name }}"
 
             - name: Validate Mod
               uses: TheBrutalX/factorio-mod-uploader-action@v2
