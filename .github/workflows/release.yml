@@ -15,7 +15,7 @@ jobs:
             
             - name: Commit processed file
               run: | 
-                  echo "The release tag is: ${{ github.event.release.tag_name }}"
+                  sed -i.bak -e 's/"version": ".*"/"version": "${{ github.event.release.tag_name }}"/g' -e 's/"version": "v/"version": "/g' info.json
 
             - name: Validate Mod
               uses: TheBrutalX/factorio-mod-uploader-action@v2
