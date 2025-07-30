@@ -1,20 +1,29 @@
 PoleQueue = {}
 SpotQueue = {}
 
+local function get_member_safe(object, field)
+	local call_result, value = pcall( function () return object[field] end )
+	if call_result then
+		return value
+	else
+		return nil
+	end
+end
+
 local function on_area_selected(event)
 	if event.item ~= "auto-lamp-tool" then
 		return
 	end
 	
 	local player = game.players[event.player_index]
-	local surface = player.surface
 	
 	local player_settings = settings.get_player_settings(player)
-	local lamp_distance   = player_settings["auto-lamp-distance"].value --TODO Convert this to a map setting, I can't get the calling player here and don't feel like storing it.
+	local lamp_distance   = player_settings["auto-lamp-distance"].value
 	
-	local electric = surface.find_entities_filtered({area = event.area, type = "electric-pole", force = player.force})
-	for _, entity in pairs(electric) do
-		PoleQueue["UN"..entity.unit_number] = {entity = entity, lamp_distance = lamp_distance, player_name = player.name}
+	for _, entity in pairs(event.entities) do
+		if not entity.to_be_deconstructed() and (entity.type == "electric-pole" or entity.type == "entity-ghost" and entity.ghost_type == "electric-pole") then
+			PoleQueue["UN"..entity.unit_number] = {entity = entity, lamp_distance = lamp_distance, player_name = player.name}
+		end
 	end
 end
 
@@ -24,7 +33,6 @@ local function on_reverse_selected(event)
 	end
 
 	local player = game.players[event.player_index]
-	local surface = player.surface
 
 	local newUndoIndex = 0
 	for _, entity in pairs(event.entities) do
@@ -47,7 +55,7 @@ local function on_tick(event)
 		local distance = spot.distance
 		local player   = spot.player
 
-		if parent.valid and surface.can_place_entity({name = "small-lamp", position = position, force = force}) and surface.count_entities_filtered({position = position, radius = distance, type = "lamp"}) == 0 and surface.count_entities_filtered({position = position, radius = distance, ghost_type = "lamp"}) == 0 then
+		if parent.valid and surface.can_place_entity({name = "small-lamp", position = position, force = force, build_check_type=defines.build_check_type.manual_ghost}) and surface.count_entities_filtered({position = position, radius = distance, type = "lamp"}) == 0 and surface.count_entities_filtered({position = position, radius = distance, ghost_type = "lamp"}) == 0 then
 			surface.create_entity({name = "entity-ghost", inner_name = "small-lamp", expires = false, position = position, force = force, player = player})
 		else
 			continue = true
@@ -64,8 +72,12 @@ local function on_tick(event)
 			local lamp_distance = wrapper.lamp_distance
 			local player_name   = wrapper.player_name
 			if entity.valid then
-				local supply_area = entity.prototype.get_supply_area_distance(entity.quality)
-				local entity_size = math.abs(entity.prototype.selection_box.left_top.x * 2)
+				local prototype = entity.prototype
+				if entity.type == "entity-ghost" then
+					prototype = entity.ghost_prototype
+				end
+				local supply_area = prototype.get_supply_area_distance(entity.quality)
+				local entity_size = math.abs(prototype.selection_box.left_top.x * 2)
 				local position    = entity.position
 				for x = position.x - supply_area + 0.5, position.x + supply_area do
 					for y = position.y - supply_area + 0.5, position.y + supply_area do
