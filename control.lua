@@ -22,7 +22,7 @@ local function on_area_selected(event)
 	
 	for _, entity in pairs(event.entities) do
 		if not entity.to_be_deconstructed() and (entity.type == "electric-pole" or entity.type == "entity-ghost" and entity.ghost_type == "electric-pole") then
-			PoleQueue["UN"..entity.unit_number] = {entity = entity, lamp_distance = lamp_distance, player_name = player.name}
+			PoleQueue["UN"..entity.unit_number] = {entity = entity, lamp_distance = lamp_distance, player = player, tick = event.tick}
 		end
 	end
 end
@@ -54,14 +54,27 @@ local function on_tick(event)
 		local position = {spot.x, spot.y}
 		local distance = spot.distance
 		local player   = spot.player
+		local tick = spot.tick
 
 		local can_place = surface.can_place_entity({name = "small-lamp", position = position, force = force, build_check_type=defines.build_check_type.manual_ghost})
 		local lamp_conflicts = surface.count_entities_filtered({position = position, radius = distance, type = "lamp", to_be_deconstructed = false})
 		local ghost_conflicts = surface.count_entities_filtered({position = position, radius = distance, ghost_type = "lamp"})
-		-- game.players[1].print(serpent.block(can_place)..":"..serpent.block(lamp_conflicts)..":"..serpent.block(ghost_conflicts))
+		-- player.print(serpent.block(can_place)..":"..serpent.block(lamp_conflicts)..":"..serpent.block(ghost_conflicts))
+
+		local undo_stack = player.undo_redo_stack
 
 		if parent.valid and can_place and lamp_conflicts == 0 and ghost_conflicts == 0 then
-			surface.create_entity({name = "entity-ghost", inner_name = "small-lamp", expires = false, position = position, force = force, player = player})
+			local undo_index = 0
+			for index = 1, undo_stack.get_undo_item_count() do
+				if undo_stack.get_undo_tag(index, 1, "auto-lamp-tool") and undo_stack.get_undo_tag(index, 1, "auto-lamp-tool") == player.name..":"..tick then
+					undo_index = index
+					break
+				end
+			end
+			surface.create_entity({name = "entity-ghost", inner_name = "small-lamp", expires = false, position = position, force = force, player = player, undo_index = undo_index})
+			if undo_index == 0 then
+				player.undo_redo_stack.set_undo_tag(1, 1, "auto-lamp-tool", player.name..":"..tick)
+			end
 		else
 			continue = true
 		end
@@ -75,7 +88,8 @@ local function on_tick(event)
 		if wrapper then
 			local entity        = wrapper.entity
 			local lamp_distance = wrapper.lamp_distance
-			local player_name   = wrapper.player_name
+			local player        = wrapper.player
+			local tick = wrapper.tick
 			if entity.valid then
 				local prototype = entity.prototype
 				if entity.type == "entity-ghost" then
@@ -88,12 +102,12 @@ local function on_tick(event)
 					for y = position.y - supply_area + 0.5, position.y + supply_area do
 						if math.abs(x - position.x) * 2 > entity_size or math.abs(y - position.y) * 2 > entity_size then
 							if not SpotQueue[x..":"..y] then
-								SpotQueue[x..":"..y] = {x = x, y = y, parent = entity, distance = lamp_distance, player = player_name}
+								SpotQueue[x..":"..y] = {x = x, y = y, parent = entity, distance = lamp_distance, player = player, tick = tick}
 							end
 						end
 					end
 				end
-				-- game.players[1].print("Tick: "..event.tick.." | Unit Number - "..entity.unit_number.." -> "..serpent.block(supply_area))
+				-- player.print("Tick: "..event.tick.." | Unit Number - "..entity.unit_number.." -> "..serpent.block(supply_area))
 			end
 			PoleQueue["UN"..entity.unit_number] = nil
 		end
