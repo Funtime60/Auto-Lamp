@@ -4,8 +4,6 @@ on:
     release:
         types: [released]
     
-    workflow_dispatch:
-
 jobs:
     publish-mod:
         runs-on: ubuntu-latest
@@ -16,7 +14,7 @@ jobs:
             - name: Update version file with release tag
               run: | 
                   cat info.json
-                  echo >>>>>>
+                  echo ">>>>>>"
                   sed -i.bak -e 's/"version": ".*"/"version": "${{ github.event.release.tag_name }}"/g' -e 's/"version": "v/"version": "/g' info.json
                   cat info.json
 
