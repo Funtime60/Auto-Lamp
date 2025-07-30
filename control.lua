@@ -55,7 +55,12 @@ local function on_tick(event)
 		local distance = spot.distance
 		local player   = spot.player
 
-		if parent.valid and surface.can_place_entity({name = "small-lamp", position = position, force = force, build_check_type=defines.build_check_type.manual_ghost}) and surface.count_entities_filtered({position = position, radius = distance, type = "lamp"}) == 0 and surface.count_entities_filtered({position = position, radius = distance, ghost_type = "lamp"}) == 0 then
+		local can_place = surface.can_place_entity({name = "small-lamp", position = position, force = force, build_check_type=defines.build_check_type.manual_ghost})
+		local lamp_conflicts = surface.count_entities_filtered({position = position, radius = distance, type = "lamp", to_be_deconstructed = false})
+		local ghost_conflicts = surface.count_entities_filtered({position = position, radius = distance, ghost_type = "lamp"})
+		-- game.players[1].print(serpent.block(can_place)..":"..serpent.block(lamp_conflicts)..":"..serpent.block(ghost_conflicts))
+
+		if parent.valid and can_place and lamp_conflicts == 0 and ghost_conflicts == 0 then
 			surface.create_entity({name = "entity-ghost", inner_name = "small-lamp", expires = false, position = position, force = force, player = player})
 		else
 			continue = true
