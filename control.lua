@@ -1,5 +1,5 @@
-poleQueue = {}
-spotQueue = {}
+PoleQueue = {}
+SpotQueue = {}
 
 local function on_shortcut(event)
 	if event.prototype_name == "auto-lamp-shortcut" then
@@ -28,7 +28,7 @@ local function on_area_selected(event)
 	
 	local electric = surface.find_entities_filtered({area = event.area, type = "electric-pole", force = player.force})
 	for _, entity in pairs(electric) do
-		poleQueue["UN"..entity.unit_number] = {entity = entity, lamp_distance = lamp_distance, player_name = player.name}
+		PoleQueue["UN"..entity.unit_number] = {entity = entity, lamp_distance = lamp_distance, player_name = player.name}
 	end
 end
 
@@ -50,7 +50,7 @@ local function on_reverse_selected(event)
 end
 
 local function on_tick(event)
-	local _, spot   = next(spotQueue)
+	local _, spot   = next(SpotQueue)
 	if spot then
 		local continue = false
 
@@ -67,12 +67,12 @@ local function on_tick(event)
 			continue = true
 		end
 		
-		spotQueue[spot.x..":"..spot.y] = nil
+		SpotQueue[spot.x..":"..spot.y] = nil
 		if continue then
 			on_tick(event)
 		end
 	else
-		local _, wrapper = next(poleQueue)
+		local _, wrapper = next(PoleQueue)
 		if wrapper then
 			local entity        = wrapper.entity
 			local lamp_distance = wrapper.lamp_distance
@@ -84,15 +84,15 @@ local function on_tick(event)
 				for x = position.x - supply_area + 0.5, position.x + supply_area do
 					for y = position.y - supply_area + 0.5, position.y + supply_area do
 						if math.abs(x - position.x) * 2 > entity_size or math.abs(y - position.y) * 2 > entity_size then
-							if not spotQueue[x..":"..y] then
-								spotQueue[x..":"..y] = {x = x, y = y, parent = entity, distance = lamp_distance, player = player_name}
+							if not SpotQueue[x..":"..y] then
+								SpotQueue[x..":"..y] = {x = x, y = y, parent = entity, distance = lamp_distance, player = player_name}
 							end
 						end
 					end
 				end
 				-- game.players[1].print("Tick: "..event.tick.." | Unit Number - "..entity.unit_number.." -> "..serpent.block(supply_area))
 			end
-			poleQueue["UN"..entity.unit_number] = nil
+			PoleQueue["UN"..entity.unit_number] = nil
 		end
 	end
 end
